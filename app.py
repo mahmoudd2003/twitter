@@ -1,3 +1,14 @@
+# ========== Auto Install snscrape if missing ==========
+import subprocess, sys
+try:
+    import snscrape  # noqa
+except ImportError:
+    subprocess.run(
+        [sys.executable, "-m", "pip", "install", "snscrape==0.7.0.20230622", "httpx<0.28"],
+        check=False
+    )
+# ======================================================
+
 import streamlit as st
 import pandas as pd
 from libs.utils import load_baseline, save_baseline, get_env
