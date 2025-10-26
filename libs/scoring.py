@@ -1,25 +1,24 @@
-import os
-import json
-from pathlib import Path
-from dotenv import load_dotenv
+import math
 
-load_dotenv()
+# Update Exponential Moving Average of term frequencies
+def update_ema(baseline: dict, counts_now: dict, alpha: float = 0.3):
+    updated = baseline.copy()
+    for term, c in counts_now.items():
+        prev = float(updated.get(term, {}).get("ema", 0.0))
+        ema = alpha * float(c) + (1 - alpha) * prev
+        updated[term] = {"ema": ema}
+    for term, val in baseline.items():
+        if term not in counts_now:
+            prev = float(val.get("ema", 0.0))
+            ema = (1 - alpha) * prev
+            updated[term] = {"ema": ema}
+    return updated
 
-DATA_DIR = Path(__file__).resolve().parent.parent / "data"
-BASELINE_PATH = DATA_DIR / "baseline.json"
-BASELINE_PATH.parent.mkdir(parents=True, exist_ok=True)
-
-def load_baseline():
-    if BASELINE_PATH.exists():
-        try:
-            return json.loads(BASELINE_PATH.read_text(encoding="utf-8"))
-        except Exception:
-            return {}
-    return {}
-
-def save_baseline(data: dict):
-    BASELINE_PATH.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
-
-def get_env(name, default=None):
-    val = os.getenv(name)
-    return val if (val is not None and val != "") else default
+# Compute spike scores vs EMA
+def spike_scores(baseline: dict, counts_now: dict):
+    scores = {}
+    for term, c in counts_now.items():
+        ema = float(baseline.get(term, {}).get("ema", 0.0))
+        score = (float(c) - ema) / max(1.0, math.sqrt(ema)) if ema >= 0 else 0.0
+        scores[term] = round(score, 2)
+    return scores
