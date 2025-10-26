@@ -4,8 +4,10 @@ numpy>=1.26.0
 python-dotenv>=1.0.0
 pytrends>=4.9.2
 tweepy>=4.14.0
+# جرّب أولًا هذا الإصدار الثابت
 snscrape==0.7.0.20230622
 beautifulsoup4>=4.12.2
 lxml>=4.9.3
 requests>=2.31.0
+# snscrape يتعارض مع httpx الحديثة؛ ثبّت أقل من 0.28
 httpx<0.28
